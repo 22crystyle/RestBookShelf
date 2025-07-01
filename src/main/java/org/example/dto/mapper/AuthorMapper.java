@@ -1,10 +1,10 @@
 package org.example.dto.mapper;
 
-import org.example.dto.AuthorDto;
+import org.example.dto.request.AuthorRequest;
 import org.example.entity.Author;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface AuthorMapper {
-    Author authorDtoToAuthor(AuthorDto dto);
+    Author requestToEntity(AuthorRequest request);
 }
