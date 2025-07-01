@@ -2,7 +2,11 @@ server:
   port: 1024
 spring:
   datasource:
-    url: jdbc:h2:mem:default
+    url: jdbc:h2:file:D:\Max\repos\RestBookShelf;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
