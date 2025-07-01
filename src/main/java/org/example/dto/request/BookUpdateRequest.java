@@ -3,7 +3,7 @@ package org.example.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record BookRequest(
+public record BookUpdateRequest(
         @NotBlank
         String title,
         @NotNull

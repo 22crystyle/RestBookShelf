@@ -1,0 +1,32 @@
+#### Create Book
+POST http://localhost:1024/api/v1/books
+Content-Type: application/json
+
+{
+  "title": "{{bookTitle}}",
+  "authorId": {{authorId}},
+  "publishedYear": {{publishedYear}},
+  "genre": "{{genre}}"
+}
+
+#### Get book pagination
+GET http://localhost:1024/api/v1/books?
+    page={{page}}&
+    size={{size}}
+
+#### Get book by id
+GET http://localhost:1024/api/v1/books/{{bookId}}
+
+#### Update book data
+PUT http://localhost:1024/api/v1/books/{{bookId}}
+Content-Type: application/json
+
+{
+  "title": "QWERTY",
+  "authorId": {{authorId}},
+  "publishedYear": 2077,
+  "genre": "Which"
+}
+
+#### Delete book by id
+DELETE http://localhost:1024/api/v1/books/{{bookId}}
