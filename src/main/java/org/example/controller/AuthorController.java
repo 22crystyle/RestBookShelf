@@ -1,7 +1,45 @@
 package org.example.controller;
 
-import org.springframework.web.bind.annotation.RestController;
+import org.example.dto.mapper.AuthorMapper;
+import org.example.dto.request.AuthorRequest;
+import org.example.dto.response.AuthorResponse;
+import org.example.entity.Author;
+import org.example.service.AuthorService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/v1/authors")
 public class AuthorController {
+
+    private final AuthorService authorService;
+    private final AuthorMapper authorMapper;
+
+    public AuthorController(AuthorService authorService, AuthorMapper authorMapper) {
+        this.authorService = authorService;
+        this.authorMapper = authorMapper;
+    }
+
+    @PostMapping
+    public ResponseEntity<AuthorResponse> createAuthor(@RequestBody AuthorRequest request) {
+        Author entity = authorService.createAuthor(request);
+        AuthorResponse dto = authorMapper.entityToResponse(entity);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<AuthorResponse>> getAllAuthors(@RequestParam int page, @RequestParam int size ) {
+        Page<Author> entities = authorService.getAllAuthors(PageRequest.of(page - 1, size));
+        Page<AuthorResponse> dtos = entities.map(authorMapper::entityToResponse);
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AuthorResponse> getAuthorById(@PathVariable Long id) {
+        Author entity = authorService.getById(id);
+        AuthorResponse dto = authorMapper.entityToResponse(entity);
+        return ResponseEntity.ok(dto);
+    }
 }

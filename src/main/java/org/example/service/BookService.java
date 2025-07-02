@@ -18,19 +18,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BookService {
     private final BookRepository bookRepository;
-    private final BookMapper mapper;
+    private final BookMapper bookMapper;
     private final AuthorRepository authorRepository;
 
     @Autowired
-    public BookService(BookRepository bookRepository, BookMapper mapper, AuthorRepository authorRepository) {
+    public BookService(BookRepository bookRepository,
+                       BookMapper bookMapper,
+                       AuthorRepository authorRepository) {
         this.bookRepository = bookRepository;
-        this.mapper = mapper;
+        this.bookMapper = bookMapper;
         this.authorRepository = authorRepository;
     }
 
     @Transactional
     public Book add(BookRequest request) {
-        Book book = mapper.requestToEntity(request);
+        Book book = bookMapper.requestToEntity(request);
         Author author = authorRepository.findById(request.authorId())
                 .orElseThrow(() -> new AuthorNotFound(request.authorId()));
         book.setAuthor(author);
