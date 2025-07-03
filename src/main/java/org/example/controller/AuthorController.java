@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import jakarta.validation.Valid;
 import org.example.dto.mapper.AuthorMapper;
 import org.example.dto.request.AuthorRequest;
 import org.example.dto.response.AuthorResponse;
@@ -8,10 +9,12 @@ import org.example.service.AuthorService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/authors")
+@Validated
 public class AuthorController {
 
     private final AuthorService authorService;
@@ -23,14 +26,14 @@ public class AuthorController {
     }
 
     @PostMapping
-    public ResponseEntity<AuthorResponse> createAuthor(@RequestBody AuthorRequest request) {
+    public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid AuthorRequest request) {
         Author entity = authorService.createAuthor(request);
         AuthorResponse dto = authorMapper.entityToResponse(entity);
         return ResponseEntity.ok(dto);
     }
 
     @GetMapping
-    public ResponseEntity<Page<AuthorResponse>> getAllAuthors(@RequestParam int page, @RequestParam int size ) {
+    public ResponseEntity<Page<AuthorResponse>> getAllAuthors(@RequestParam int page, @RequestParam int size) {
         Page<Author> entities = authorService.getAllAuthors(PageRequest.of(page - 1, size));
         Page<AuthorResponse> dtos = entities.map(authorMapper::entityToResponse);
         return ResponseEntity.ok(dtos);
