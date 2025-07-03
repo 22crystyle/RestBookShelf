@@ -22,10 +22,10 @@ PUT http://localhost:1024/api/v1/books/{{bookId}}
 Content-Type: application/json
 
 {
-  "title": "QWERTY",
+  "title": "{{bookTitle}}",
   "authorId": {{authorId}},
-  "publishedYear": 2077,
-  "genre": "Which"
+  "publishedYear": {{publishedYear}},
+  "genre": "{{genre}}"
 }
 
 #### Delete book by id

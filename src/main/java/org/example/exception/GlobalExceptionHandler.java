@@ -1,7 +1,9 @@
 package org.example.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.dto.response.RestErrorResponse;
 import org.example.dto.response.ValidationErrorResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -13,9 +15,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
@@ -41,9 +45,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(response, status);
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<RestErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        Throwable cause = ex.getCause();
+        String message = "Data integrity violation";
+        if (cause instanceof org.hibernate.exception.ConstraintViolationException hce) {
+            String constraint = hce.getConstraintName();
+            message = "Нарушено ограничение: " + constraint;
+        }
+        RestErrorResponse error = new RestErrorResponse(HttpStatus.CONFLICT.toString(), message);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestErrorResponse> handleAll(Throwable ex) {
         RestErrorResponse error = new RestErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.toString(), ex.getMessage());
+        log.error(Arrays.toString(ex.getStackTrace()));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }

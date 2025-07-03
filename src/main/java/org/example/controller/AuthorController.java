@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.example.dto.mapper.AuthorMapper;
 import org.example.dto.request.AuthorRequest;
 import org.example.dto.response.AuthorResponse;
@@ -33,7 +34,10 @@ public class AuthorController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<AuthorResponse>> getAllAuthors(@RequestParam int page, @RequestParam int size) {
+    public ResponseEntity<Page<AuthorResponse>> getAllAuthors(
+            @RequestParam @Min(1) int page,
+            @RequestParam @Min(1) int size
+    ) {
         Page<Author> entities = authorService.getAllAuthors(PageRequest.of(page - 1, size));
         Page<AuthorResponse> dtos = entities.map(authorMapper::entityToResponse);
         return ResponseEntity.ok(dtos);

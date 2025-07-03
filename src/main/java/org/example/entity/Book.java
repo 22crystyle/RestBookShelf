@@ -9,10 +9,15 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "Book", uniqueConstraints = @UniqueConstraint(
+        name = "uk_book_title",
+        columnNames = "title"
+))
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "title")
     private String title;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id")

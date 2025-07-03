@@ -4,13 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record BookUpdateRequest(
-        @NotBlank
+        @NotBlank(message = "Название книги не должно быть пустым")
         String title,
-        @NotNull
+        @NotNull(message = "У книги должен быть автор")
         Long authorId,
-        @NotNull
+        @NotNull(message = "Книга должна иметь год выпуска")
         Integer publishedYear,
-        @NotBlank
+        @NotBlank(message = "У книги должен быть жанр")
         String genre
 ) {
 }
