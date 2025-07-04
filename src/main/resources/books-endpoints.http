@@ -4,8 +4,8 @@ Content-Type: application/json
 
 {
   "title": "{{bookTitle}}",
-  "authorId": {{authorId}},
-  "publishedYear": {{publishedYear}},
+  "author_id": {{authorId}},
+  "year": {{publishedYear}},
   "genre": "{{genre}}"
 }
 

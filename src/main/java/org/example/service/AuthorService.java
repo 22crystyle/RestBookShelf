@@ -30,7 +30,7 @@ public class AuthorService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Author> getAllAuthors(PageRequest request) {
+    public Page<Author> getPage(PageRequest request) {
         return repository.findAll(request);
     }
 

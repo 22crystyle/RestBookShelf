@@ -10,10 +10,10 @@ import org.example.exception.BookNotFound;
 import org.example.repository.AuthorRepository;
 import org.example.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class BookService {
@@ -31,7 +31,7 @@ public class BookService {
     }
 
     @Transactional
-    public Book add(BookRequest request) {
+    public Book create(BookRequest request) {
         Book book = bookMapper.requestToEntity(request);
         Author author = authorRepository.findById(request.authorId())
                 .orElseThrow(() -> new AuthorNotFound(request.authorId()));
@@ -40,8 +40,8 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Book> getAll(PageRequest pageRequest) {
-        return bookRepository.findAll(pageRequest);
+    public List<Book> getList() {
+        return bookRepository.findAll();
     }
 
     @Transactional(readOnly = true)

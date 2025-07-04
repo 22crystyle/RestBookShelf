@@ -8,19 +8,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import org.example.dto.mapper.BookMapper;
 import org.example.dto.request.BookRequest;
 import org.example.dto.request.BookUpdateRequest;
 import org.example.dto.response.BookResponse;
-import org.example.dto.response.pagination.PageBookResponse;
 import org.example.entity.Book;
 import org.example.service.BookService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(
         name = "Books",
@@ -54,7 +52,7 @@ public class BookController {
     )
     @PostMapping
     public ResponseEntity<BookResponse> createBook(@RequestBody @Valid BookRequest request) {
-        Book entity = bookService.add(request);
+        Book entity = bookService.create(request);
         BookResponse dto = bookMapper.entityToResponse(entity);
         return ResponseEntity.ok(dto);
     }
@@ -64,19 +62,15 @@ public class BookController {
             description = "Возвращает страницу книг с пагинацией",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Страница книг",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PageBookResponse.class)))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = BookResponse.class)))),
                     @ApiResponse(responseCode = "400", description = "Неверные параметры пагинации",
                             content = @Content)
             }
     )
     @GetMapping
-    public ResponseEntity<Page<BookResponse>> getAllBooks(
-            @Parameter(description = "Номер страницы начинается с 1", required = true, example = "1")
-            @RequestParam @Valid @Min(1) int page,
-            @Parameter(description = "Размер страницы", required = true, example = "10")
-            @RequestParam @Valid @Min(1) int size) {
-        Page<Book> entities = bookService.getAll(PageRequest.of(page - 1, size));
-        Page<BookResponse> dtos = entities.map(bookMapper::entityToResponse);
+    public ResponseEntity<List<BookResponse>> getListOfBooks() {
+        List<Book> entities = bookService.getList();
+        List<BookResponse> dtos = entities.stream().map(bookMapper::entityToResponse).toList();
         return ResponseEntity.ok(dtos);
     }
 
