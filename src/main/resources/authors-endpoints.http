@@ -3,7 +3,7 @@ POST http://localhost:1024/api/v1/authors
 Content-Type: application/json
 
 {
-  "name": "{{authorName}}",
+  "name": "qweee",
   "birthYear": {{authorBirth}}
 }
 
