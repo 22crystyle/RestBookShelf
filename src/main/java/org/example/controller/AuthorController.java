@@ -77,13 +77,13 @@ public class AuthorController {
             }
     )
     @GetMapping
-    public ResponseEntity<Page<AuthorResponse>> getAllAuthors(
+    public ResponseEntity<Page<AuthorResponse>> getPageOfAuthors(
             @Parameter(description = "Номер страницы начинается с 1", required = true, example = "1")
             @RequestParam @Min(1) int page,
             @Parameter(description = "Размер страницы", required = true, example = "10")
             @RequestParam @Min(1) int size
     ) {
-        Page<Author> entities = authorService.getAllAuthors(PageRequest.of(page - 1, size));
+        Page<Author> entities = authorService.getPage(PageRequest.of(page - 1, size));
         Page<AuthorResponse> dtos = entities.map(authorMapper::entityToResponse);
         return ResponseEntity.ok(dtos);
     }

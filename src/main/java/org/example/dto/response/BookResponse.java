@@ -1,11 +1,12 @@
 package org.example.dto.response;
 
-import org.example.entity.Author;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record BookResponse(
         Long id,
         String title,
-        Author author,
+        AuthorResponse author,
+        @JsonProperty("year")
         Integer publishedYear,
         String genre
 ) {
