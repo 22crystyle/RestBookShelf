@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,10 +19,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<RestErrorResponse> handleNotFoundException(EntityNotFoundException ex) {
         RestErrorResponse error = new RestErrorResponse(HttpStatus.NOT_FOUND.toString(), ex.getMessage());
@@ -56,6 +59,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         RestErrorResponse error = new RestErrorResponse(HttpStatus.CONFLICT.toString(), message);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
+
+    @Override
+    public ResponseEntity<Object> handleExceptionInternal(
+            Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request
+    ) {
+        RestErrorResponse errorResponse;
+
+        if(body instanceof RestErrorResponse) {
+            errorResponse = (RestErrorResponse) body;
+        } else {
+            String message = body != null
+                    ? body.toString()
+                    : Optional.ofNullable(ex.getMessage()).orElse(statusCode.toString());
+
+            errorResponse = RestErrorResponse.builder()
+                    .code(statusCode.toString())
+                    .message(message)
+                    .build();
+        }
+
+
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestErrorResponse> handleAll(Throwable ex) {

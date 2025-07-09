@@ -2,10 +2,7 @@
 POST http://localhost:1024/api/v1/authors
 Content-Type: application/json
 
-{
-  "name": "{{authorName}}",
-  "birthYear": {{authorBirth}}
-}
+
 
 #### Get authors pagination
 GET http://localhost:1024/api/v1/authors?page={{page}}&size={{size}}

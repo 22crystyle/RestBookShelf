@@ -1,10 +1,12 @@
 package org.example.dto.response;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.Objects;
 
 @Getter
+@Builder
 public class RestErrorResponse {
     private final String code;
     private final String message;
@@ -15,14 +17,6 @@ public class RestErrorResponse {
     ) {
         this.code = code;
         this.message = message;
-    }
-
-    public String code() {
-        return code;
-    }
-
-    public String message() {
-        return message;
     }
 
     @Override
