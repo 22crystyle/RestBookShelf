@@ -12,6 +12,7 @@ import org.example.dto.mapper.BookMapper;
 import org.example.dto.request.BookRequest;
 import org.example.dto.request.BookUpdateRequest;
 import org.example.dto.response.BookResponse;
+import org.example.dto.response.pagination.PageBookResponse;
 import org.example.entity.Book;
 import org.example.service.BookService;
 import org.springframework.http.ResponseEntity;
@@ -69,7 +70,7 @@ public class BookController {
             description = "Возвращает страницу книг с пагинацией",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Страница книг",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = BookResponse.class)))),
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PageBookResponse.class)))),
                     @ApiResponse(responseCode = "400", description = "Неверные параметры пагинации",
                             content = @Content)
             }

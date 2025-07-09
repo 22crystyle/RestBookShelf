@@ -1,0 +1,382 @@
+openapi: 3.1.0
+info:
+  title: Rest Book Shelf API
+  description: Сервис учёта книг
+  version: 1.0.0
+servers:
+  - url: http://localhost:1024
+    description: Локальный сервер
+tags:
+  - name: Author
+    description: Api для управления авторами
+  - name: Books
+    description: API для управления книгами
+paths:
+  /api/v1/books/{id}:
+    get:
+      tags:
+        - Books
+      summary: Получить книгу по ID
+      description: Возвращает книгу по её идентификатору
+      operationId: getBookById
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор книги
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        "200":
+          description: Книга найдена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+        "404":
+          description: Книга не найдена
+    put:
+      tags:
+        - Books
+      summary: Обновить книгу
+      description: Полностью обновляет информацию о книге
+      operationId: updateBook
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор книги
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      requestBody:
+        description: Новые данные книги
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: Книга успешно обновлена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+        "400":
+          description: Неверные данные запроса
+        "404":
+          description: Книга не найдена
+    delete:
+      tags:
+        - Books
+      summary: Удалить книгу
+      description: Удаляет книгу по идентификатору
+      operationId: deleteBook
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор книги
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        "204":
+          description: Книга успешно удалена
+        "404":
+          description: Книга не найдена
+  /api/v1/books:
+    get:
+      tags:
+        - Books
+      summary: Получить список книг
+      description: Возвращает страницу книг с пагинацией
+      operationId: getListOfBooks
+      responses:
+        "200":
+          description: Страница книг
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PageBookResponse"
+        "400":
+          description: Неверные параметры пагинации
+    post:
+      tags:
+        - Books
+      summary: Создать книгу
+      description: Создает новую книгу
+      operationId: createBook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookRequest"
+        required: true
+      responses:
+        "200":
+          description: Книга успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+        "400":
+          description: Неверные данные запроса
+  /api/v1/authors:
+    get:
+      tags:
+        - Author
+      summary: Получить список авторов
+      description: Возвращает страницу авторов с пагинацией
+      operationId: getPageOfAuthors
+      parameters:
+        - name: page
+          in: query
+          description: Номер страницы начинается с 1
+          required: true
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 1
+        - name: size
+          in: query
+          description: Размер страницы
+          required: true
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 10
+      responses:
+        "200":
+          description: Данные авторов получены
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageAuthorResponse"
+        "400":
+          description: Неверные данные запроса
+    post:
+      tags:
+        - Author
+      summary: Создать автора
+      description: Создает нового автора
+      operationId: createAuthor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthorRequest"
+        required: true
+      responses:
+        "200":
+          description: Автор успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorResponse"
+        "400":
+          description: Неверные данные запроса
+  /api/v1/authors/{id}:
+    get:
+      tags:
+        - Author
+      summary: Получить автора по ID
+      description: Возвращает данные автора по его идентификатору
+      operationId: getAuthorById
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор книги
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        "200":
+          description: Автор найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorResponse"
+        "404":
+          description: Автор не найден
+components:
+  schemas:
+    AuthorResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        birthYear:
+          type: integer
+          format: int32
+    BookResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        author:
+          $ref: "#/components/schemas/AuthorResponse"
+        year:
+          type: integer
+          format: int32
+        genre:
+          type: string
+    BookUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        authorId:
+          type: integer
+          format: int64
+        publishedYear:
+          type: integer
+          format: int32
+        genre:
+          type: string
+          minLength: 1
+      required:
+        - authorId
+        - genre
+        - publishedYear
+        - title
+    BookRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 2147483647
+          minLength: 3
+        authorId:
+          type: integer
+          format: int64
+        publishedYear:
+          type: integer
+          format: int32
+        genre:
+          type: string
+          minLength: 1
+      required:
+        - authorId
+        - genre
+        - publishedYear
+    AuthorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 2147483647
+          minLength: 3
+          pattern: "^[^0-9]*$"
+        birthYear:
+          type: integer
+          format: int32
+    PageBookResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/BookResponse"
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        last:
+          type: boolean
+        totalElements:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        offset:
+          type: integer
+          format: int32
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        sorted:
+          type: boolean
+        empty:
+          type: boolean
+        unsorted:
+          type: boolean
+    PageAuthorResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuthorResponse"
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        last:
+          type: boolean
+        totalElements:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        empty:
+          type: boolean
