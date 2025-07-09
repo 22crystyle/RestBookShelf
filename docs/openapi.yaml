@@ -4,30 +4,30 @@ info:
   description: Сервис учёта книг
   version: 1.0.0
 servers:
-  - url: http://localhost:1024
-    description: Локальный сервер
+- url: http://localhost:1024
+  description: Локальный сервер
 tags:
-  - name: Author
-    description: Api для управления авторами
-  - name: Books
-    description: API для управления книгами
+- name: Author
+  description: Api для управления авторами
+- name: Books
+  description: API для управления книгами
 paths:
   /api/v1/books/{id}:
     get:
       tags:
-        - Books
+      - Books
       summary: Получить книгу по ID
       description: Возвращает книгу по её идентификатору
       operationId: getBookById
       parameters:
-        - name: id
-          in: path
-          description: Идентификатор книги
-          required: true
-          schema:
-            type: integer
-            format: int64
-          example: 1
+      - name: id
+        in: path
+        description: Идентификатор книги
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 1
       responses:
         "200":
           description: Книга найдена
@@ -39,19 +39,19 @@ paths:
           description: Книга не найдена
     put:
       tags:
-        - Books
+      - Books
       summary: Обновить книгу
       description: Полностью обновляет информацию о книге
       operationId: updateBook
       parameters:
-        - name: id
-          in: path
-          description: Идентификатор книги
-          required: true
-          schema:
-            type: integer
-            format: int64
-          example: 1
+      - name: id
+        in: path
+        description: Идентификатор книги
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 1
       requestBody:
         description: Новые данные книги
         content:
@@ -72,19 +72,19 @@ paths:
           description: Книга не найдена
     delete:
       tags:
-        - Books
+      - Books
       summary: Удалить книгу
       description: Удаляет книгу по идентификатору
       operationId: deleteBook
       parameters:
-        - name: id
-          in: path
-          description: Идентификатор книги
-          required: true
-          schema:
-            type: integer
-            format: int64
-          example: 1
+      - name: id
+        in: path
+        description: Идентификатор книги
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 1
       responses:
         "204":
           description: Книга успешно удалена
@@ -93,24 +93,22 @@ paths:
   /api/v1/books:
     get:
       tags:
-        - Books
+      - Books
       summary: Получить список книг
-      description: Возвращает страницу книг с пагинацией
+      description: Возвращает список книг
       operationId: getListOfBooks
       responses:
         "200":
-          description: Страница книг
+          description: Список книг
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/PageBookResponse"
-        "400":
-          description: Неверные параметры пагинации
+                  $ref: "#/components/schemas/BookResponse"
     post:
       tags:
-        - Books
+      - Books
       summary: Создать книгу
       description: Создает новую книгу
       operationId: createBook
@@ -132,29 +130,29 @@ paths:
   /api/v1/authors:
     get:
       tags:
-        - Author
+      - Author
       summary: Получить список авторов
       description: Возвращает страницу авторов с пагинацией
       operationId: getPageOfAuthors
       parameters:
-        - name: page
-          in: query
-          description: Номер страницы начинается с 1
-          required: true
-          schema:
-            type: integer
-            format: int32
-            minimum: 1
-          example: 1
-        - name: size
-          in: query
-          description: Размер страницы
-          required: true
-          schema:
-            type: integer
-            format: int32
-            minimum: 1
-          example: 10
+      - name: page
+        in: query
+        description: Номер страницы начинается с 1
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+        example: 1
+      - name: size
+        in: query
+        description: Размер страницы
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+        example: 10
       responses:
         "200":
           description: Данные авторов получены
@@ -166,7 +164,7 @@ paths:
           description: Неверные данные запроса
     post:
       tags:
-        - Author
+      - Author
       summary: Создать автора
       description: Создает нового автора
       operationId: createAuthor
@@ -188,19 +186,19 @@ paths:
   /api/v1/authors/{id}:
     get:
       tags:
-        - Author
+      - Author
       summary: Получить автора по ID
       description: Возвращает данные автора по его идентификатору
       operationId: getAuthorById
       parameters:
-        - name: id
-          in: path
-          description: Идентификатор книги
-          required: true
-          schema:
-            type: integer
-            format: int64
-          example: 1
+      - name: id
+        in: path
+        description: Идентификатор книги
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 1
       responses:
         "200":
           description: Автор найден
@@ -254,10 +252,10 @@ components:
           type: string
           minLength: 1
       required:
-        - authorId
-        - genre
-        - publishedYear
-        - title
+      - authorId
+      - genre
+      - publishedYear
+      - title
     BookRequest:
       type: object
       properties:
@@ -275,9 +273,9 @@ components:
           type: string
           minLength: 1
       required:
-        - authorId
-        - genre
-        - publishedYear
+      - authorId
+      - genre
+      - publishedYear
     AuthorRequest:
       type: object
       properties:
@@ -289,13 +287,13 @@ components:
         birthYear:
           type: integer
           format: int32
-    PageBookResponse:
+    PageAuthorResponse:
       type: object
       properties:
         content:
           type: array
           items:
-            $ref: "#/components/schemas/BookResponse"
+            $ref: "#/components/schemas/AuthorResponse"
         pageable:
           $ref: "#/components/schemas/PageableObject"
         last:
@@ -347,36 +345,4 @@ components:
         empty:
           type: boolean
         unsorted:
-          type: boolean
-    PageAuthorResponse:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: "#/components/schemas/AuthorResponse"
-        pageable:
-          $ref: "#/components/schemas/PageableObject"
-        last:
-          type: boolean
-        totalElements:
-          type: integer
-          format: int32
-        totalPages:
-          type: integer
-          format: int32
-        first:
-          type: boolean
-        size:
-          type: integer
-          format: int32
-        number:
-          type: integer
-          format: int32
-        sort:
-          $ref: "#/components/schemas/SortObject"
-        numberOfElements:
-          type: integer
-          format: int32
-        empty:
           type: boolean

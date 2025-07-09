@@ -9,7 +9,7 @@ Content-Type: application/json
   "genre": "{{genre}}"
 }
 
-#### Get book pagination
+#### Get list of books
 GET http://localhost:1024/api/v1/books?
     page={{page}}&
     size={{size}}

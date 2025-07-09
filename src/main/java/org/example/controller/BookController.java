@@ -67,12 +67,10 @@ public class BookController {
 
     @Operation(
             summary = "Получить список книг",
-            description = "Возвращает страницу книг с пагинацией",
+            description = "Возвращает список книг",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Страница книг",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = PageBookResponse.class)))),
-                    @ApiResponse(responseCode = "400", description = "Неверные параметры пагинации",
-                            content = @Content)
+                    @ApiResponse(responseCode = "200", description = "Список книг",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = BookResponse.class))))
             }
     )
     @GetMapping
