@@ -33,7 +33,7 @@
 2. Настройте параметры подключения к базе в `src/main/resources/application.properties`:
 
    ```properties
-   spring.datasource.url=jdbc:h2:mem:bookshelf;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
+   spring.datasource.url=jdbc:h2:mem:bookshelf;DB_CLOSE_DELAY=-1
    spring.datasource.username=sa
    spring.datasource.password=
    spring.jpa.hibernate.ddl-auto=update
