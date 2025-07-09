@@ -27,7 +27,7 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<BookResponse> createBook(@RequestBody BookRequest request) {
+    public ResponseEntity<BookResponse> createBook(@RequestBody @Valid BookRequest request) {
         Book entity = bookService.add(request);
         BookResponse dto = bookMapper.entityToResponse(entity);
         return ResponseEntity.ok(dto);
@@ -50,7 +50,10 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BookResponse> updateBook(@PathVariable Long id, @RequestBody BookUpdateRequest request) {
+    public ResponseEntity<BookResponse> updateBook(
+            @PathVariable Long id,
+            @RequestBody @Valid BookUpdateRequest request
+    ) {
         Book entity = bookService.update(id, request);
         BookResponse dto = bookMapper.entityToResponse(entity);
         return ResponseEntity.ok(dto);

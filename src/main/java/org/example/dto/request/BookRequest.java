@@ -2,15 +2,16 @@ package org.example.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public record BookRequest(
-        @NotBlank
+        @Size(message = "Слишком короткое название книги (мин. 3)", min = 3)
         String title,
-        @NotNull
+        @NotNull(message = "У книги должен быть автор")
         Long authorId,
-        @NotNull
+        @NotNull(message = "Книга должна иметь год выпуска")
         Integer publishedYear,
-        @NotBlank
+        @NotBlank(message = "У книги должен быть жанр")
         String genre
 ) {
 }

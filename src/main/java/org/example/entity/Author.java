@@ -9,10 +9,15 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "Author", uniqueConstraints = @UniqueConstraint(
+        name = "uk_author_name",
+        columnNames = "name"
+))
 public class Author {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "name")
     private String name;
     @Column(name = "birth_year")
     private Integer birthYear;
