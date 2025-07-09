@@ -11,6 +11,7 @@ public class BookData {
     public static final Book DEFAULT_ENTITY = entity().build();
     public static final BookRequest DEFAULT_REQUEST = request().build();
     public static final BookResponse DEFAULT_RESPONSE = response().build();
+    public static final BookUpdateRequest DEFAULT_UPDATE_REQUEST = updateRequest().build();
 
     private BookData() {
     }

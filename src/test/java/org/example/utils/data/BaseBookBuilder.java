@@ -2,7 +2,7 @@ package org.example.utils.data;
 
 public abstract class BaseBookBuilder<T extends BaseBookBuilder<T>> {
     protected String title = "Title";
-    protected Integer publishedYear = 1900;
+    protected Integer publishedYear = 1970;
     protected String genre = "Unknown";
 
     public T withTitle(String title) {

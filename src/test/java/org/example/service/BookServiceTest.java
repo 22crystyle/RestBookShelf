@@ -57,7 +57,7 @@ public class BookServiceTest {
         assertEquals(1L, result.getId());
         assertEquals("Title", result.getTitle());
         assertSame(author, result.getAuthor());
-        assertEquals(1900, result.getPublishedYear());
+        assertEquals(1970, result.getPublishedYear());
         assertEquals("Unknown", result.getGenre());
 
         InOrder inOrder = inOrder(bookMapper, authorRepository, bookRepository);
@@ -144,12 +144,12 @@ public class BookServiceTest {
         Author oldAuthor = AuthorData.entity()
                 .withId(oldAuthorId)
                 .withName("Old Author")
-                .withBirthYear(1900).build();
+                .withBirthYear(1970).build();
         Book existing = BookData.entity()
                 .withId(bookId)
                 .withTitle("Old Title").
                 withAuthor(oldAuthor)
-                .withPublishedYear(1900)
+                .withPublishedYear(1970)
                 .withGenre("Old Genre").build();
 
         Author newAuthor = AuthorData.entity()

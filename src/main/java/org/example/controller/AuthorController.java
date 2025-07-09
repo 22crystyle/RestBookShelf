@@ -19,6 +19,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 @Tag(
         name = "Author",
@@ -57,7 +60,12 @@ public class AuthorController {
     public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid AuthorRequest request) {
         Author entity = authorService.createAuthor(request);
         AuthorResponse dto = authorMapper.entityToResponse(entity);
-        return ResponseEntity.ok(dto);
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .path("/{id}")
+                .buildAndExpand(dto.id())
+                .toUri();
+        return ResponseEntity.created(uri).body(dto);
     }
 
     @Operation(

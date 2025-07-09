@@ -17,7 +17,9 @@ import org.example.service.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @Tag(
@@ -54,7 +56,12 @@ public class BookController {
     public ResponseEntity<BookResponse> createBook(@RequestBody @Valid BookRequest request) {
         Book entity = bookService.create(request);
         BookResponse dto = bookMapper.entityToResponse(entity);
-        return ResponseEntity.ok(dto);
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequestUri()
+                .path("/{id}")
+                .buildAndExpand(dto.id())
+                .toUri();
+        return ResponseEntity.created(uri).body(dto);
     }
 
     @Operation(
