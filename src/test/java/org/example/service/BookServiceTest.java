@@ -9,6 +9,8 @@ import org.example.exception.AuthorNotFound;
 import org.example.exception.BookNotFound;
 import org.example.repository.AuthorRepository;
 import org.example.repository.BookRepository;
+import org.example.utils.data.AuthorData;
+import org.example.utils.data.BookData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -38,9 +40,9 @@ public class BookServiceTest {
 
     @Test
     void create_ValidBookRequest_ReturnsEntity() {
-        BookRequest request = new BookRequest("Title", 1L, 1900, "Unknown");
-        Book mapped = new Book(null, "Title", null, 1900, "Unknown");
-        Author author = new Author(1L, "Author", 1900);
+        BookRequest request = BookData.DEFAULT_REQUEST;
+        Book mapped = BookData.entity().withId(null).build();
+        Author author = AuthorData.DEFAULT_ENTITY;
 
         when(bookMapper.requestToEntity(request)).thenReturn(mapped);
         when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
@@ -67,30 +69,31 @@ public class BookServiceTest {
 
     @Test
     void create_throwsAuthorNotFound_whenAuthorMissing() {
-        BookRequest request = new BookRequest("Title", 42L, 1900, "Unknown");
-        Book mapped = new Book(null, "Title", null, 1900, "Unknown");
+        Long illegalId = 42L;
+        BookRequest request = BookData.request().withAuthorId(42L).build();
+        Book mapped = BookData.DEFAULT_ENTITY;
 
         when(bookMapper.requestToEntity(request)).thenReturn(mapped);
-        when(authorRepository.findById(42L)).thenReturn(Optional.empty());
+        when(authorRepository.findById(illegalId)).thenReturn(Optional.empty());
 
         AuthorNotFound ex = assertThrows(
                 AuthorNotFound.class,
                 () -> bookService.create(request)
         );
-        assertEquals(42L, ex.getEntityId());
+        assertEquals(illegalId, ex.getEntityId());
 
         verify(bookMapper).requestToEntity(request);
-        verify(authorRepository).findById(42L);
+        verify(authorRepository).findById(illegalId);
         verifyNoMoreInteractions(bookRepository);
     }
 
     @Test
     void whenGetList_thenReturnList() {
-        Author author = new Author(1L, "Author", 1900);
+        Author author = AuthorData.DEFAULT_ENTITY;
         List<Book> expected = List.of(
-                new Book(1L, "Title", author, 1900, "Unknown"),
-                new Book(2L, "Book", author, 2006, "Unknown"),
-                new Book(3L, "Who", author, 2077, "Sci-FI")
+                BookData.DEFAULT_ENTITY,
+                BookData.entity().withId(2L).withTitle("Book").withAuthor(author).withPublishedYear(2006).withGenre("Unknown").build(),
+                BookData.entity().withId(3L).withTitle("Who").withAuthor(author).withPublishedYear(2077).withGenre("Sci-Fi").build()
         );
 
         when(bookRepository.findAll()).thenReturn(expected);
@@ -106,8 +109,7 @@ public class BookServiceTest {
     @Test
     void getById_ValidRequest_ReturnsEntity() {
         Long id = 1L;
-        Author author = new Author(1L, "Author", 1900);
-        Book expected = new Book(1L, "Title", author, 1900, "Unknown");
+        Book expected = BookData.DEFAULT_ENTITY;
 
         when(bookRepository.findById(id)).thenReturn(Optional.of(expected));
         Book result = bookService.getById(id);
@@ -127,24 +129,44 @@ public class BookServiceTest {
         BookNotFound ex = assertThrows(
                 BookNotFound.class,
                 () -> bookService.getById(id));
-        assertEquals(42L, ex.getEntityId());
+        assertEquals(id, ex.getEntityId());
 
         verify(bookRepository).findById(id);
         verifyNoMoreInteractions(bookRepository);
     }
 
     @Test
-    void update_ValidUpdateRequest_ReturnsEntity() {
+    void update_validUpdateRequest_returnsEntity() {
         Long bookId = 1L;
         Long oldAuthorId = 1L;
         Long newAuthorId = 2L;
 
-        Author oldAuthor = new Author(oldAuthorId, "Old Author", 1900);
-        Book existing = new Book(bookId, "Old Title", oldAuthor, 1800, "Old Genre");
+        Author oldAuthor = AuthorData.entity()
+                .withId(oldAuthorId)
+                .withName("Old Author")
+                .withBirthYear(1900).build();
+        Book existing = BookData.entity()
+                .withId(bookId)
+                .withTitle("Old Title").
+                withAuthor(oldAuthor)
+                .withPublishedYear(1900)
+                .withGenre("Old Genre").build();
 
-        Author newAuthor = new Author(newAuthorId, "New Author", 2050);
-        BookUpdateRequest request = new BookUpdateRequest("New Title", newAuthor.getId(), 2021, "New Genre");
-        Book updated = new Book(bookId, "New Title", newAuthor, 2021, "New Genre");
+        Author newAuthor = AuthorData.entity()
+                .withId(newAuthorId)
+                .withName("New Author")
+                .withBirthYear(2050).build();
+        BookUpdateRequest request = BookData.updateRequest()
+                .withTitle("New Title")
+                .withAuthorId(newAuthorId)
+                .withPublishedYear(2021)
+                .withGenre("New Genre").build();
+        Book updated = BookData.entity()
+                .withId(bookId)
+                .withTitle("New Title")
+                .withAuthor(newAuthor)
+                .withPublishedYear(2021)
+                .withGenre("New Genre").build();
 
         when(bookRepository.findById(bookId)).thenReturn(Optional.of(existing));
         when(authorRepository.findById(newAuthor.getId())).thenReturn(Optional.of(newAuthor));

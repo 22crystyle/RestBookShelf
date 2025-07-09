@@ -5,6 +5,7 @@ import org.example.dto.request.AuthorRequest;
 import org.example.entity.Author;
 import org.example.exception.AuthorNotFound;
 import org.example.repository.AuthorRepository;
+import org.example.utils.data.AuthorData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -35,9 +36,9 @@ class AuthorServiceTest {
 
     @Test
     void createAuthor_validRequest_returnsEntity() {
-        AuthorRequest request = new AuthorRequest("Author", 1900);
-        Author mapped = new Author(null, "Author", 1900);
-        Author saved = new Author(1L, "Author", 1900);
+        AuthorRequest request = AuthorData.DEFAULT_REQUEST;
+        Author mapped = AuthorData.entity().withId(null).build();
+        Author saved = AuthorData.DEFAULT_ENTITY;
 
         when(mapper.requestToEntity(request)).thenReturn(mapped);
         when(repository.save(mapped)).thenReturn(saved);
@@ -46,7 +47,7 @@ class AuthorServiceTest {
 
         assertEquals(1L, result.getId());
         assertEquals("Author", result.getName());
-        assertEquals(1900, result.getBirthYear());
+        assertEquals(1970, result.getBirthYear());
 
         InOrder inOrder = inOrder(mapper, repository);
         inOrder.verify(mapper).requestToEntity(request);
@@ -57,7 +58,7 @@ class AuthorServiceTest {
     @Test
     void getAllAuthors_validPageRequest_returnsPage() {
         PageRequest pageRequest = PageRequest.of(0, 10);
-        Author author = new Author(1L, "Author", 1900);
+        Author author = AuthorData.DEFAULT_ENTITY;
         Page<Author> expected = new PageImpl<>(Collections.singletonList(author));
 
         when(repository.findAll(pageRequest)).thenReturn(expected);
@@ -74,14 +75,14 @@ class AuthorServiceTest {
     @Test
     void getById_existingId_returnsEntity() {
         Long id = 1L;
-        Author expected = new Author(id, "Author", 1900);
+        Author expected = AuthorData.DEFAULT_ENTITY;
         when(repository.findById(id)).thenReturn(Optional.of(expected));
 
         Author result = service.getById(id);
 
         assertEquals(id, result.getId());
         assertEquals("Author", result.getName());
-        assertEquals(1900, result.getBirthYear());
+        assertEquals(1970, result.getBirthYear());
 
         verify(repository).findById(id);
         verifyNoMoreInteractions(repository);
