@@ -1,13 +1,10 @@
 package org.example.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.dto.response.RestErrorResponse;
-import org.example.dto.response.ValidationErrorResponse;
+import org.example.dto.response.error.RestErrorResponse;
+import org.example.dto.response.error.ValidationErrorResponse;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -66,8 +63,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ) {
         RestErrorResponse errorResponse;
 
-        if(body instanceof RestErrorResponse) {
+        if (body instanceof RestErrorResponse) {
             errorResponse = (RestErrorResponse) body;
+        } else if (body instanceof ProblemDetail pd) {
+            String fullMsg = ex.getMessage();
+            String shortMsg = (fullMsg != null && fullMsg.contains(":"))
+                    ? fullMsg.substring(0, fullMsg.indexOf(":"))
+                    : fullMsg;
+            errorResponse = RestErrorResponse.builder()
+                    .code(statusCode.toString())
+                    .message(shortMsg)
+                    .build();
         } else {
             String message = body != null
                     ? body.toString()
@@ -79,10 +85,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                     .build();
         }
 
-
         return ResponseEntity.badRequest().body(errorResponse);
     }
-
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestErrorResponse> handleAll(Throwable ex) {

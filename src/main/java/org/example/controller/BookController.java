@@ -12,7 +12,6 @@ import org.example.dto.mapper.BookMapper;
 import org.example.dto.request.BookRequest;
 import org.example.dto.request.BookUpdateRequest;
 import org.example.dto.response.BookResponse;
-import org.example.dto.response.pagination.PageBookResponse;
 import org.example.entity.Book;
 import org.example.service.BookService;
 import org.springframework.http.ResponseEntity;
