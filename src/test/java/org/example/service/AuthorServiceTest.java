@@ -3,9 +3,10 @@ package org.example.service;
 import org.example.dto.mapper.AuthorMapper;
 import org.example.dto.request.AuthorRequest;
 import org.example.entity.Author;
-import org.example.exception.AuthorNotFound;
+import org.example.exception.AuthorNotFoundException;
 import org.example.repository.AuthorRepository;
 import org.example.utils.data.AuthorData;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -19,7 +20,9 @@ import org.springframework.data.domain.PageRequest;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +38,8 @@ class AuthorServiceTest {
     private AuthorService service;
 
     @Test
-    void createAuthor_validRequest_returnsEntity() {
+    @DisplayName("create: при валидном запросе возвращает созданную сущность")
+    void create_validRequest_returnsEntity() {
         AuthorRequest request = AuthorData.DEFAULT_REQUEST;
         Author mapped = AuthorData.entity().withId(null).build();
         Author saved = AuthorData.DEFAULT_ENTITY;
@@ -43,7 +47,7 @@ class AuthorServiceTest {
         when(mapper.requestToEntity(request)).thenReturn(mapped);
         when(repository.save(mapped)).thenReturn(saved);
 
-        Author result = service.createAuthor(request);
+        Author result = service.create(request);
 
         assertEquals(1L, result.getId());
         assertEquals("Author", result.getName());
@@ -56,6 +60,7 @@ class AuthorServiceTest {
     }
 
     @Test
+    @DisplayName("getPage: при валидном запросе возвращает страницу авторов")
     void getAllAuthors_validPageRequest_returnsPage() {
         PageRequest pageRequest = PageRequest.of(0, 10);
         Author author = AuthorData.DEFAULT_ENTITY;
@@ -73,7 +78,8 @@ class AuthorServiceTest {
     }
 
     @Test
-    void getById_existingId_returnsEntity() {
+    @DisplayName("getById: при существующем идентификаторе возвращает данные автора")
+    void getById_whenExists_returnsEntity() {
         Long id = 1L;
         Author expected = AuthorData.DEFAULT_ENTITY;
         when(repository.findById(id)).thenReturn(Optional.of(expected));
@@ -89,17 +95,16 @@ class AuthorServiceTest {
     }
 
     @Test
-    void getById_nonExistingId_throwsAuthorNotFound() {
-        Long invalidId = 42L;
-        when(repository.findById(invalidId)).thenReturn(Optional.empty());
+    @DisplayName("createAuthor: если автора нет в репозитории, бросает AuthorNotFoundException")
+    void getById_whenNotFound_throwsAuthorNotFoundException() {
+        Long id = 42L;
+        when(repository.findById(id)).thenReturn(Optional.empty());
 
-        AuthorNotFound ex = assertThrows(
-                AuthorNotFound.class,
-                () -> service.getById(invalidId)
-        );
-        assertEquals(invalidId, ex.getEntityId());
+        assertThatThrownBy(() -> service.getById(id))
+                .isInstanceOf(AuthorNotFoundException.class)
+                .hasMessageContaining(String.valueOf(id));
 
-        verify(repository).findById(invalidId);
+        verify(repository).findById(id);
         verifyNoMoreInteractions(repository);
     }
 }

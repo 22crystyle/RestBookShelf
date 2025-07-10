@@ -5,8 +5,8 @@ import org.example.dto.request.BookRequest;
 import org.example.dto.request.BookUpdateRequest;
 import org.example.entity.Author;
 import org.example.entity.Book;
-import org.example.exception.AuthorNotFound;
-import org.example.exception.BookNotFound;
+import org.example.exception.AuthorNotFoundException;
+import org.example.exception.BookNotFoundException;
 import org.example.repository.AuthorRepository;
 import org.example.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class BookService {
     public Book create(BookRequest request) {
         Book book = bookMapper.requestToEntity(request);
         Author author = authorRepository.findById(request.authorId())
-                .orElseThrow(() -> new AuthorNotFound(request.authorId()));
+                .orElseThrow(() -> new AuthorNotFoundException(request.authorId()));
         book.setAuthor(author);
         return bookRepository.save(book);
     }
@@ -48,15 +48,15 @@ public class BookService {
     public Book getById(Long id) {
         return bookRepository
                 .findById(id)
-                .orElseThrow(() -> new BookNotFound(id));
+                .orElseThrow(() -> new BookNotFoundException(id));
     }
 
     @Transactional
     public Book update(Long id, BookUpdateRequest updateRequest) {
         Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new BookNotFound(id));
+                .orElseThrow(() -> new BookNotFoundException(id));
         Author author = authorRepository.findById(updateRequest.authorId())
-                .orElseThrow(() -> new AuthorNotFound(updateRequest.authorId()));
+                .orElseThrow(() -> new AuthorNotFoundException(updateRequest.authorId()));
 
         book.setAuthor(author);
         book.setGenre(updateRequest.genre());

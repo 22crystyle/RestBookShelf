@@ -58,7 +58,7 @@ public class AuthorController {
     )
     @PostMapping
     public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid AuthorRequest request) {
-        Author entity = authorService.createAuthor(request);
+        Author entity = authorService.create(request);
         AuthorResponse dto = authorMapper.entityToResponse(entity);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequestUri()

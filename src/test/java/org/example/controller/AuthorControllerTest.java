@@ -39,13 +39,13 @@ public class AuthorControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("POST /api/v1/authors — успешное создание")
+    @DisplayName("POST /api/v1/authors - успешное создание")
     void createAuthor_validRequest_returns200() throws Exception {
         AuthorRequest request = AuthorData.DEFAULT_REQUEST;
         Author entity = AuthorData.DEFAULT_ENTITY;
         AuthorResponse response = AuthorData.DEFAULT_RESPONSE;
 
-        when(authorService.createAuthor(request)).thenReturn(entity);
+        when(authorService.create(request)).thenReturn(entity);
         when(authorMapper.entityToResponse(entity)).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/authors")
@@ -59,13 +59,13 @@ public class AuthorControllerTest {
                 .andExpect(jsonPath("$.birthYear").value(1970))
                 .andDo(print());
 
-        verify(authorService).createAuthor(request);
+        verify(authorService).create(request);
         verify(authorMapper).entityToResponse(entity);
         verifyNoMoreInteractions(authorService, authorMapper);
     }
 
     @Test
-    @DisplayName("GET /api/v1/authors?page&size — возвращает страницу")
+    @DisplayName("GET /api/v1/authors?page&size - возвращает страницу")
     void getPageOfAuthors_validParams_returnsPage() throws Exception {
         int page = 2;
         int size = 5;
@@ -93,7 +93,7 @@ public class AuthorControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/authors/{id} — успешный запрос")
+    @DisplayName("GET /api/v1/authors/{id} - успешный запрос")
     void getAuthorById_existingId_returns200() throws Exception {
         Long id = 1L;
         Author entity = AuthorData.DEFAULT_ENTITY;

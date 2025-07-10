@@ -5,12 +5,13 @@ import org.example.dto.request.BookRequest;
 import org.example.dto.request.BookUpdateRequest;
 import org.example.entity.Author;
 import org.example.entity.Book;
-import org.example.exception.AuthorNotFound;
-import org.example.exception.BookNotFound;
+import org.example.exception.AuthorNotFoundException;
+import org.example.exception.BookNotFoundException;
 import org.example.repository.AuthorRepository;
 import org.example.repository.BookRepository;
 import org.example.utils.data.AuthorData;
 import org.example.utils.data.BookData;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -21,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -39,7 +42,8 @@ public class BookServiceTest {
     BookService bookService;
 
     @Test
-    void create_ValidBookRequest_ReturnsEntity() {
+    @DisplayName("create: при валидном запросе создает книгу, и возвращает объект")
+    void createBook_whenValidRequest_saveBookAndReturnsEntity() {
         BookRequest request = BookData.DEFAULT_REQUEST;
         Book mapped = BookData.entity().withId(null).build();
         Author author = AuthorData.DEFAULT_ENTITY;
@@ -68,7 +72,8 @@ public class BookServiceTest {
     }
 
     @Test
-    void create_throwsAuthorNotFound_whenAuthorMissing() {
+    @DisplayName("create: когда не правильный идентификатор пользователя, выбрасывает AuthorNotFoundException")
+    void createBook_whenAuthorMissing_throwsAuthorNotFoundException() {
         Long illegalId = 42L;
         BookRequest request = BookData.request().withAuthorId(42L).build();
         Book mapped = BookData.DEFAULT_ENTITY;
@@ -76,8 +81,8 @@ public class BookServiceTest {
         when(bookMapper.requestToEntity(request)).thenReturn(mapped);
         when(authorRepository.findById(illegalId)).thenReturn(Optional.empty());
 
-        AuthorNotFound ex = assertThrows(
-                AuthorNotFound.class,
+        AuthorNotFoundException ex = assertThrows(
+                AuthorNotFoundException.class,
                 () -> bookService.create(request)
         );
         assertEquals(illegalId, ex.getEntityId());
@@ -88,7 +93,8 @@ public class BookServiceTest {
     }
 
     @Test
-    void whenGetList_thenReturnList() {
+    @DisplayName("getList: возвращает список всех книг")
+    void getList_returnsList() {
         Author author = AuthorData.DEFAULT_ENTITY;
         List<Book> expected = List.of(
                 BookData.DEFAULT_ENTITY,
@@ -107,7 +113,8 @@ public class BookServiceTest {
     }
 
     @Test
-    void getById_ValidRequest_ReturnsEntity() {
+    @DisplayName("getById: при успешном запросе возвращает объект")
+    void getById_ValidRequest_returnsEntity() {
         Long id = 1L;
         Book expected = BookData.DEFAULT_ENTITY;
 
@@ -121,21 +128,22 @@ public class BookServiceTest {
     }
 
     @Test
-    void getById_throwsBookNotFound_whenInvalidId() {
+    @DisplayName("getById: если книги нет в репозитории, бросает BookNotFoundException")
+    void getById_whenNotExists_throwsBookNotFoundException() {
         Long id = 42L;
 
         when(bookRepository.findById(id)).thenReturn(Optional.empty());
 
-        BookNotFound ex = assertThrows(
-                BookNotFound.class,
-                () -> bookService.getById(id));
-        assertEquals(id, ex.getEntityId());
+        assertThatThrownBy(() -> bookService.getById(id))
+                .isInstanceOf(BookNotFoundException.class)
+                .hasMessageContaining(String.valueOf(id));
 
         verify(bookRepository).findById(id);
         verifyNoMoreInteractions(bookRepository);
     }
 
     @Test
+    @DisplayName("update: при успешном запросе, возвращает обновленный объект")
     void update_validUpdateRequest_returnsEntity() {
         Long bookId = 1L;
         Long oldAuthorId = 1L;
@@ -185,5 +193,35 @@ public class BookServiceTest {
         inOrder.verify(authorRepository).findById(newAuthorId);
         inOrder.verify(bookRepository).save(existing);
         inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    @DisplayName("update: если книги нет, бросает BookNotFounException")
+    void update_whenBookNotFound_throwsBookNotFoundException() {
+        BookUpdateRequest updateRequest = BookData.DEFAULT_UPDATE_REQUEST;
+        Long id = 1L;
+        when(bookRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> bookService.update(id, updateRequest))
+                .isInstanceOf(BookNotFoundException.class)
+                .hasMessageContaining(String.valueOf(id));
+
+
+        verify(bookRepository).findById(id);
+        verify(bookRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("deleteById: удаляет существующую книгу и возвращает true")
+    void deleteById_whenExists_deleteAndReturnsTrue() {
+        Long id = 42L;
+        when(bookRepository.existsById(id)).thenReturn(true);
+
+        boolean result = bookService.deleteById(id);
+
+        assertThat(result).isTrue();
+        InOrder inOrder = inOrder(bookRepository);
+        inOrder.verify(bookRepository).existsById(id);
+        inOrder.verify(bookRepository).deleteById(id);
     }
 }

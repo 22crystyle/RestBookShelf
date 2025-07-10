@@ -64,7 +64,7 @@ public class BookControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/books/{id} — существующая книга возвращается 200")
+    @DisplayName("GET /api/v1/books/{id} - существующая книга возвращается 200")
     void getBookById_existingBook_returns200AndBody() throws Exception {
         Long id = 1L;
         Book entity = BookData.DEFAULT_ENTITY;
@@ -128,7 +128,7 @@ public class BookControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/v1/books/{id} — существующая книга возвращается 204")
+    @DisplayName("DELETE /api/v1/books/{id} - существующая книга возвращается 204")
     void deleteBook_existing_returns204() throws Exception {
         Long id = 1L;
         when(bookService.deleteById(id)).thenReturn(true);

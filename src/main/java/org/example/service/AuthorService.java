@@ -3,7 +3,7 @@ package org.example.service;
 import org.example.dto.mapper.AuthorMapper;
 import org.example.dto.request.AuthorRequest;
 import org.example.entity.Author;
-import org.example.exception.AuthorNotFound;
+import org.example.exception.AuthorNotFoundException;
 import org.example.repository.AuthorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,7 +24,7 @@ public class AuthorService {
     }
 
     @Transactional
-    public Author createAuthor(AuthorRequest request) {
+    public Author create(AuthorRequest request) {
         Author author = authorMapper.requestToEntity(request);
         return repository.save(author);
     }
@@ -37,6 +37,6 @@ public class AuthorService {
     @Transactional(readOnly = true)
     public Author getById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new AuthorNotFound(id));
+                .orElseThrow(() -> new AuthorNotFoundException(id));
     }
 }
