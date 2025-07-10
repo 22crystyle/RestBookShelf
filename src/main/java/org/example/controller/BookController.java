@@ -137,9 +137,7 @@ public class BookController {
             @Parameter(description = "Идентификатор книги", required = true, example = "1")
             @PathVariable Long id
     ) {
-        if (bookService.deleteById(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        bookService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

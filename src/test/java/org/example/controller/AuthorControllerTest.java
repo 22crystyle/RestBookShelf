@@ -5,6 +5,7 @@ import org.example.dto.mapper.AuthorMapper;
 import org.example.dto.request.AuthorRequest;
 import org.example.dto.response.AuthorResponse;
 import org.example.entity.Author;
+import org.example.exception.AuthorNotFoundException;
 import org.example.service.AuthorService;
 import org.example.utils.data.AuthorData;
 import org.junit.jupiter.api.DisplayName;
@@ -14,12 +15,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,7 +42,7 @@ public class AuthorControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("POST /api/v1/authors - успешное создание")
+    @DisplayName("POST /authors - успешное создание")
     void createAuthor_validRequest_returns200() throws Exception {
         AuthorRequest request = AuthorData.DEFAULT_REQUEST;
         Author entity = AuthorData.DEFAULT_ENTITY;
@@ -65,7 +68,7 @@ public class AuthorControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/authors?page&size - возвращает страницу")
+    @DisplayName("GET /authors?page&size - возвращает страницу")
     void getPageOfAuthors_validParams_returnsPage() throws Exception {
         int page = 2;
         int size = 5;
@@ -93,7 +96,7 @@ public class AuthorControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/authors/{id} - успешный запрос")
+    @DisplayName("GET /authors/{id} - успешный запрос")
     void getAuthorById_existingId_returns200() throws Exception {
         Long id = 1L;
         Author entity = AuthorData.DEFAULT_ENTITY;
@@ -112,5 +115,52 @@ public class AuthorControllerTest {
         verify(authorService).getById(id);
         verify(authorMapper).entityToResponse(entity);
         verifyNoMoreInteractions(authorService, authorMapper);
+    }
+
+    @Test
+    @DisplayName("GET /authors/{id} - 404 при несуществующем авторе")
+    void getById_whenNotFound_returns404() throws Exception {
+        Long id = 42L;
+        when(authorService.getById(id)).thenThrow(new AuthorNotFoundException(id));
+
+        mockMvc.perform(get("/api/v1/authors/{id}", id)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.toString()))
+                .andExpect(jsonPath("$.message").value(containsString("not found")))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("POST /authors - 400 при валидации: пустое имя")
+    void createAuthor_whenNameInvalid_returns400() throws Exception {
+        AuthorRequest invalidRequest = AuthorData.request().withName(null).build();
+
+        mockMvc.perform(post("/api/v1/authors")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.toString()))
+                .andExpect(jsonPath("$.message").value(containsString("Validation Error")))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("POST /authors - 400 при невалидном формате JSON")
+    void createAuthor_whenMalformedJson_returns400() throws Exception {
+        String brokenJson = """
+                {
+                    "name": "Author"
+                    "birthYear": 1970
+                """;
+
+        mockMvc.perform(post("/api/v1/authors")
+                        .content(brokenJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.toString()))
+                .andExpect(jsonPath("$.message").value(containsString("parse error")))
+                .andDo(print());
     }
 }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record BookRequest(
+        @NotBlank(message = "Название книги не должно быть пустым")
         @Size(message = "Слишком короткое название книги (мин. 3)", min = 3)
         String title,
         @NotNull(message = "У книги должен быть автор")

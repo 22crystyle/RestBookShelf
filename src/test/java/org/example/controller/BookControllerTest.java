@@ -6,16 +6,19 @@ import org.example.dto.request.BookRequest;
 import org.example.dto.request.BookUpdateRequest;
 import org.example.dto.response.BookResponse;
 import org.example.entity.Book;
+import org.example.exception.BookNotFoundException;
 import org.example.service.BookService;
 import org.example.utils.data.BookData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,7 +38,7 @@ public class BookControllerTest {
     BookMapper bookMapper;
 
     @Test
-    @DisplayName("POST /api/v1/books - создать книгу")
+    @DisplayName("POST /books - создать книгу")
     void createBook_validRequest_returns200() throws Exception {
         BookRequest request = BookData.DEFAULT_REQUEST;
         Book entity = BookData.DEFAULT_ENTITY;
@@ -64,7 +67,7 @@ public class BookControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/books/{id} - существующая книга возвращается 200")
+    @DisplayName("GET /books/{id} - существующая книга возвращается 200")
     void getBookById_existingBook_returns200AndBody() throws Exception {
         Long id = 1L;
         Book entity = BookData.DEFAULT_ENTITY;
@@ -89,7 +92,7 @@ public class BookControllerTest {
     }
 
     @Test
-    @DisplayName("PUT /api/v1/books/{id} - успешное обновление")
+    @DisplayName("PUT /books/{id} - успешное обновление")
     void updateBook_existingBook_returns200AndBody() throws Exception {
         Long id = 1L;
         Book entity = BookData.DEFAULT_ENTITY;
@@ -128,7 +131,7 @@ public class BookControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/v1/books/{id} - существующая книга возвращается 204")
+    @DisplayName("DELETE /books/{id} - существующая книга возвращается 204")
     void deleteBook_existing_returns204() throws Exception {
         Long id = 1L;
         when(bookService.deleteById(id)).thenReturn(true);
@@ -139,5 +142,51 @@ public class BookControllerTest {
 
         verify(bookService).deleteById(id);
         verifyNoMoreInteractions(bookService, bookMapper);
+    }
+
+    @Test
+    @DisplayName("GET /books/{id} — 404 при несуществующей книге")
+    void getBookById_WhenNotFound_ShouldReturn404() throws Exception {
+        Long id = 42L;
+        when(bookService.getById(id)).thenThrow(new BookNotFoundException(id));
+
+        mockMvc.perform(get("/api/v1/books/{id}", id)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.toString()))
+                .andExpect(jsonPath("$.message").value(containsString("not found")));
+    }
+
+    @Test
+    @DisplayName("POST /books — 400 при отсутствии обязательных полей")
+    void createBook_WhenMissingFields_ShouldReturn400() throws Exception {
+        String invalidJson = """
+                    {
+                      "title": "Book",
+                      "publishedYear": 1999
+                      // no authorId
+                    }
+                """;
+
+        mockMvc.perform(post("/api/v1/books")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.toString()))
+                .andExpect(jsonPath("$.message").value(containsString("parse error")));
+    }
+
+    @Test
+    @DisplayName("DELETE /books/{id} - 404 при несуществующей книге")
+    void deleteBook_WhenNotExists_ShouldReturn404() throws Exception {
+        Long id = 42L;
+        when(bookService.deleteById(id)).thenThrow(new BookNotFoundException(id));
+
+        mockMvc.perform(delete("/api/v1/books/{id}", id)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.toString()))
+                .andExpect(jsonPath("$.message").value(containsString("not found")));
     }
 }
